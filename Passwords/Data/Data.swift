@@ -8,34 +8,6 @@
 import Foundation
 
 
-//class VaultData: ObservableObject {
-//    @Published var vault: [String: KeychainData]
-//
-//    init() {
-//        vault = ["All keychains": KeychainData(name: "All keychains", passwords: [])]
-//    }
-//
-//    func AddPassword(data: PasswordData, keychain: String) {
-//        if vault[keychain] == nil {  // If vault does not contain keychain with current pw add new keychain
-//            vault[keychain] = KeychainData(name: keychain, passwords: [data])
-//        } else {    // Vault contains keychain, add pw to the keychain
-//            vault[keychain]!.passwords.append(data)
-//        }
-//    }
-//}
-//
-//struct KeychainData {
-//    var name: String
-//    var passwords: [PasswordData]
-//}
-//
-//struct PasswordData {
-//    var name: String
-//    var url: String
-//    var type: String
-//    var password: String
-//}
-
 /// Model: Model storing all data
 class Model: ObservableObject {
     /// VaultData: Data for the Model
@@ -53,16 +25,11 @@ class Model: ObservableObject {
         self.vaultData = vaultData
     }
     
-    /// Adds a password to the keychain
+    /// Sets a password in the Keychain, if one with the displayname exists it will get changed, if none with the displayname exists it will get added
     /// - Parameters:
     ///     - data: PasswordData: Data for the password
     /// - Returns: Bool: Wether the adding was successful
-    func addPassword(data: PasswordData) -> Bool {
-        // Check if password exists
-//        if false {    // ToDo:
-//            return false
-//        }
-        
+    func setPassword(data: PasswordData) -> Bool {
         // Add password to app Keychain
         let res = vaultData.setPassword(data: data)
         if !res { return false }
@@ -125,7 +92,6 @@ struct VaultData: Codable {
                 keychains[data.keychain]!.passwords[idx!] = data
             }
         }
-//        dump(keychains)
         
         // Save to Keychain
         manager!.SaveRegisterData(data: self)
@@ -134,22 +100,44 @@ struct VaultData: Codable {
     }
 }
 
+/// KeychainData: Stores data for a keychain
 struct KeychainData: Codable {
+    /// The name of the keychain
     var name: String
+    /// Array containing PasswordData for all passwords in this keychain
     var passwords: [PasswordData]
 }
 
+/// PasswordData: Stores data for a password
 struct PasswordData: Codable {
+    /// The display name for the password
     var displayname: String
+    
+    /// The username of the password
     var username: String
+    
+    /// The email of the password
+    var email: String
+    
+    /// The website for the password
     var website: String
+    
+    /// The actual password for the password
     var password: String
+    
+    /// The description of the password
     var description: String
-    var type: String
+    
+    /// The type describing what to autofill
+    var autofill: AutofillType
+    
+    /// The username of the password
     var keychain: String
 }
 
-class PasswordType {
-    static let web = "web"
-    static let normal = "normal"
+/// AutofillType: Type describing what to autofill
+enum AutofillType: String, Codable {
+    case none = ""
+    case username
+    case email
 }

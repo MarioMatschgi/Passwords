@@ -79,39 +79,33 @@ struct AddView: View {
     @ObservedObject var model: Model
     @Binding var isOpen: Bool
     
-    @State var pw_type = PasswordType.web
     @State var pw_displayname = ""
     @State var pw_username = ""
     @State var pw_email = ""
-    @State var pw_description = ""
     @State var pw_website = ""
     @State var pw_password = ""
-    @State var pw_autofill = ""
+    @State var pw_description = ""
+    @State var pw_autofill: AutofillType = .none
     @State var pw_keychain = ""
+    
     
     @State var isFieldMissing = false
     
-    let formMargin = CGFloat(75)
+    let formMargin = CGFloat(100)
     
     var body: some View {
         VStack {
-            Picker("", selection: $pw_type) {
-                Text("Normal").tag(PasswordType.normal)
-                Text("Website").tag(PasswordType.web)
-            }.pickerStyle(SegmentedPickerStyle()).labelsHidden()
-            Spacer().frame(height: 25)
             Form {
                 HStack(alignment: VerticalAlignment.top) {
-//                    FormText(GetTxt(), formMargin)
-                    Text("\(GetTxt())*").frame(width: formMargin, alignment: .leading)
-                    TextField(GetTxt(), text: $pw_website).textFieldStyle(RoundedBorderTextFieldStyle())
+                    Text("Displayname*").frame(width: formMargin, alignment: .leading)
+                    TextField("Displayname", text: $pw_displayname).textFieldStyle(RoundedBorderTextFieldStyle())
                 }
                 HStack(alignment: VerticalAlignment.top) {
-                    Text("Username\(pw_autofill == "username" ? "*" : "")").frame(width: formMargin, alignment: .leading)
+                    Text("Username\(pw_autofill == .username ? "*" : "")").frame(width: formMargin, alignment: .leading)
                     TextField("Username", text: $pw_username).textFieldStyle(RoundedBorderTextFieldStyle())
                 }
                 HStack(alignment: VerticalAlignment.top) {
-                    Text("E-mail\(pw_autofill == "email" ? "*" : "")").frame(width: formMargin, alignment: .leading)
+                    Text("E-mail\(pw_autofill == .email ? "*" : "")").frame(width: formMargin, alignment: .leading)
                     TextField("e-mail", text: $pw_email).textFieldStyle(RoundedBorderTextFieldStyle())
                 }
                 HStack(alignment: VerticalAlignment.top) {
@@ -134,8 +128,8 @@ struct AddView: View {
                 HStack(alignment: VerticalAlignment.top) {
                     FormText("Autofill*", formMargin)
                     Picker(selection: $pw_autofill, label: EmptyView()) {
-                        Text("Username").tag("username")
-                        Text("E-mail").tag("email")
+                        Text("Username").tag(AutofillType.username)
+                        Text("E-mail").tag(AutofillType.email)
                     }.pickerStyle(RadioGroupPickerStyle()).horizontalRadioGroupLayout().labelsHidden()
                 }
             }
@@ -153,13 +147,14 @@ struct AddView: View {
                 if manager!.debug {
                     Spacer()
                     Button(action: {
-                        pw_website = "programario.at"
+                        pw_displayname = "Displayname"
                         pw_username = "Mario"
                         pw_email = "mario@programario.at"
+                        pw_website = "programario.at"
                         pw_password = "1234"
                         pw_description = "Programario is the best"
+                        pw_autofill = .email
                         pw_keychain = "Keychain1"
-                        pw_autofill = "username"
                     }) {
                         Text("FILL")
                     }
@@ -181,19 +176,12 @@ struct AddView: View {
     }
     
     func TryAdd() -> Bool {
-        if pw_website == "" || (pw_autofill == "username" && pw_username == "") || (pw_autofill == "email" && pw_email == "") || pw_password == "" || pw_keychain == "" || pw_autofill == "" {
+        if pw_website == "" || (pw_autofill == .username && pw_username == "") || (pw_autofill == .email && pw_email == "") || pw_password == "" || pw_keychain == "" || pw_autofill == .none {
             return false
         }
         
         // Add new PW
-        return model.addPassword(data: PasswordData(displayname: pw_displayname, username: pw_username, website: pw_website, password: pw_password, description: pw_description, type: pw_type, keychain: pw_keychain))
-//        manager?.AddPassword(data: PasswordData(name: pw_username, url: pw_url, type: pw_type, password: pw_pw), keychain: pw_keychain)
-        
-//        return true
-    }
-    
-    func GetTxt() -> String {
-        return pw_type == PasswordType.web ? "Website" : pw_type == PasswordType.normal ? "Name" : "INVALID"
+        return model.setPassword(data: PasswordData(displayname: pw_displayname, username: pw_username, email: pw_email, website: pw_website, password: pw_password, description: pw_description, autofill: pw_autofill, keychain: pw_keychain))
     }
 }
 
