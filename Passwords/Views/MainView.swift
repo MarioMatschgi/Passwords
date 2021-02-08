@@ -9,7 +9,7 @@ import SwiftUI
 
 var mainView: MainView?
 struct MainView: View {
-    @ObservedObject var vaultData: VaultData = VaultData()
+    @ObservedObject var model: Model = Model()
     
     init() {
         mainView = self
@@ -17,13 +17,15 @@ struct MainView: View {
     
     @State var isAddSheet = true//false
     
+    @State var update = false
+    
     var body: some View {
         NavigationView {
             List {
-                Section(header: Text("Keychains: (\(vaultData.vault.count))")) {
-                    ForEach(vaultData.vault.keys.sorted(), id: \.self) { key in
-                        let element: KeychainData = vaultData.vault[key]!
-                        NavigationLink(destination: KeychainView(vaultData: vaultData, keychain: key)) {
+                Section(header: Text("Keychains: (\(model.vaultData.keychains.count))")) {
+                    ForEach(model.vaultData.keychains.keys.sorted(), id: \.self) { key in
+                        let element: KeychainData = model.vaultData.keychains[key]!
+                        NavigationLink(destination: KeychainView(model: model, keychain: key)) {
                             HStack {
                                 Text("\(element.name) (\(element.passwords.count))")
                             }
@@ -39,28 +41,28 @@ struct MainView: View {
         .modifier(ToolbarModifier(isAddSheet: $isAddSheet))
         
         .sheet(isPresented: $isAddSheet) {
-            AddView(vaultData: vaultData, isOpen: $isAddSheet)
+            AddView(model: model, isOpen: $isAddSheet)
         }
         
         .onAppear() {
-            vaultData.vault = manager!.GetVault()
+            model.vaultData = manager!.LoadRegisterData()
         }
     }
 }
 
 struct KeychainView: View {
-    @ObservedObject var vaultData: VaultData
+    @ObservedObject var model: Model
     @State var keychain: String
     
     var body: some View {
         NavigationView {
             List {
-                Section(header: Text("Passwords: (\(vaultData.vault[keychain]!.passwords.count))")) {
-                    ForEach(0..<vaultData.vault[keychain]!.passwords.count, id: \.self) { idx in
-                        let element: PasswordData = vaultData.vault[keychain]!.passwords[idx]
+                Section(header: Text("Passwords: (\(model.vaultData.keychains[keychain]!.passwords.count))")) {
+                    ForEach(0..<model.vaultData.keychains[keychain]!.passwords.count, id: \.self) { idx in
+                        let element: PasswordData = model.vaultData.keychains[keychain]!.passwords[idx]
                         NavigationLink(destination: Text("ASD")) {
                             HStack {
-                                Text("\(element.name)")
+                                Text("\(element.displayname)")
                             }
                         }
                     }
@@ -68,21 +70,22 @@ struct KeychainView: View {
             }.listStyle(InsetListStyle())
 
             Text("No password selected")
-        }.navigationViewStyle(DefaultNavigationViewStyle())//.navigationViewStyle(DoubleColumnNavigationViewStyle())
+        }.navigationViewStyle(DefaultNavigationViewStyle())
     }
 }
 
 
 struct AddView: View {
-    @ObservedObject var vaultData: VaultData
+    @ObservedObject var model: Model
     @Binding var isOpen: Bool
     
     @State var pw_type = PasswordType.web
+    @State var pw_displayname = ""
     @State var pw_username = ""
     @State var pw_email = ""
     @State var pw_description = ""
-    @State var pw_url = ""
-    @State var pw_pw = ""
+    @State var pw_website = ""
+    @State var pw_password = ""
     @State var pw_autofill = ""
     @State var pw_keychain = ""
     
@@ -101,7 +104,7 @@ struct AddView: View {
                 HStack(alignment: VerticalAlignment.top) {
 //                    FormText(GetTxt(), formMargin)
                     Text("\(GetTxt())*").frame(width: formMargin, alignment: .leading)
-                    TextField(GetTxt(), text: $pw_url).textFieldStyle(RoundedBorderTextFieldStyle())
+                    TextField(GetTxt(), text: $pw_website).textFieldStyle(RoundedBorderTextFieldStyle())
                 }
                 HStack(alignment: VerticalAlignment.top) {
                     Text("Username\(pw_autofill == "username" ? "*" : "")").frame(width: formMargin, alignment: .leading)
@@ -113,7 +116,7 @@ struct AddView: View {
                 }
                 HStack(alignment: VerticalAlignment.top) {
                     FormText("Password*", formMargin)
-                    SecureField("Password", text: $pw_pw).textFieldStyle(RoundedBorderTextFieldStyle())
+                    SecureField("Password", text: $pw_password).textFieldStyle(RoundedBorderTextFieldStyle())
                 }
                 HStack(alignment: VerticalAlignment.top) {
                     FormText("Description", formMargin)
@@ -123,7 +126,7 @@ struct AddView: View {
                     FormText("Keychain*", formMargin)
                     Picker(selection: $pw_keychain, label: EmptyView()) {
                         Text("select keychain").tag("")
-                        ForEach(vaultData.vault.keys.sorted(), id: \.self) { keychain in
+                        ForEach(model.vaultData.keychains.keys.sorted(), id: \.self) { keychain in
                             Text(keychain).tag(keychain)
                         }
                     }.labelsHidden()
@@ -150,10 +153,10 @@ struct AddView: View {
                 if manager!.debug {
                     Spacer()
                     Button(action: {
-                        pw_url = "programario.at"
+                        pw_website = "programario.at"
                         pw_username = "Mario"
                         pw_email = "mario@programario.at"
-                        pw_pw = "1234"
+                        pw_password = "1234"
                         pw_description = "Programario is the best"
                         pw_keychain = "Keychain1"
                         pw_autofill = "username"
@@ -178,104 +181,21 @@ struct AddView: View {
     }
     
     func TryAdd() -> Bool {
-        if pw_url == "" || (pw_autofill == "username" && pw_username == "") || (pw_autofill == "email" && pw_email == "") || pw_pw == "" || pw_keychain == "" || pw_autofill == "" {
+        if pw_website == "" || (pw_autofill == "username" && pw_username == "") || (pw_autofill == "email" && pw_email == "") || pw_password == "" || pw_keychain == "" || pw_autofill == "" {
             return false
         }
         
         // Add new PW
-        manager?.AddPassword(data: PasswordData(name: pw_username, url: pw_url, type: pw_type, password: pw_pw), keychain: pw_keychain)
+        return model.addPassword(data: PasswordData(displayname: pw_displayname, username: pw_username, website: pw_website, password: pw_password, description: pw_description, type: pw_type, keychain: pw_keychain))
+//        manager?.AddPassword(data: PasswordData(name: pw_username, url: pw_url, type: pw_type, password: pw_pw), keychain: pw_keychain)
         
-        return true
+//        return true
     }
     
     func GetTxt() -> String {
         return pw_type == PasswordType.web ? "Website" : pw_type == PasswordType.normal ? "Name" : "INVALID"
     }
 }
-
-//struct EditView: View {
-//    var body: some View {
-//        VStack {
-//            Picker("", selection: $pw_type) {
-//                Text("Normal").tag(PasswordType.normal)
-//                Text("Website").tag(PasswordType.web)
-//            }.pickerStyle(SegmentedPickerStyle()).labelsHidden()
-//            Spacer().frame(height: 25)
-//            Form {
-//                HStack(alignment: VerticalAlignment.top) {
-////                    FormText(GetTxt(), formMargin)
-//                    Text("\(GetTxt())*").frame(width: formMargin, alignment: .leading)
-//                    TextField(GetTxt(), text: $pw_url).textFieldStyle(RoundedBorderTextFieldStyle())
-//                }
-//                HStack(alignment: VerticalAlignment.top) {
-//                    FormText("Username*", formMargin)
-//                    TextField("Username", text: $pw_username).textFieldStyle(RoundedBorderTextFieldStyle())
-//                }
-//                HStack(alignment: VerticalAlignment.top) {
-//                    FormText("E-mail*", formMargin)
-//                    TextField("e-mail", text: $pw_email).textFieldStyle(RoundedBorderTextFieldStyle())
-//                }
-//                HStack(alignment: VerticalAlignment.top) {
-//                    FormText("Password*", formMargin)
-//                    SecureField("Password", text: $pw_pw).textFieldStyle(RoundedBorderTextFieldStyle())
-//                }
-//                HStack(alignment: VerticalAlignment.top) {
-//                    FormText("Description", formMargin)
-//                    TextField("Description", text: $pw_description).textFieldStyle(RoundedBorderTextFieldStyle())
-//                }
-//                HStack(alignment: VerticalAlignment.top) {
-//                    FormText("Keychain*", formMargin)
-//                    Picker(selection: $pw_keychain, label: EmptyView()) {
-//                        Text("select keychain").tag("")
-//                        ForEach(vaultData.vault.keys.sorted(), id: \.self) { keychain in
-//                            Text(keychain).tag(keychain)
-//                        }
-//                    }.labelsHidden()
-//                }
-//                HStack(alignment: VerticalAlignment.top) {
-//                    FormText("Autofill*", formMargin)
-//                    Picker(selection: $pw_autofill, label: EmptyView()) {
-//                        Text("Username").tag("username")
-//                        Text("E-mail").tag("email")
-//                    }.pickerStyle(RadioGroupPickerStyle()).horizontalRadioGroupLayout().labelsHidden()
-//                }
-//            }
-//
-//            Spacer().frame(minHeight: 25)
-//            HStack {
-//                Button(action: { isOpen = false }) {
-//                    Text("Cancel")
-//                }.keyboardShortcut(.cancelAction)
-//                if manager!.debug {
-//                    Spacer()
-//                    Button(action: {
-//                        pw_url = "programario.at"
-//                        pw_username = "Mario"
-//                        pw_email = "mario@programario.at"
-//                        pw_pw = "1234"
-//                        pw_description = "Programario is the best"
-//                        pw_keychain = "Keychain1"
-//                        pw_autofill = "username"
-//                    }) {
-//                        Text("FILL")
-//                    }
-//                }
-//                Spacer()
-//                Button(action: {
-//                    let res = TryAdd()
-//                    if res {
-//                        isFieldMissing = false
-//                        isOpen = false
-//                    } else {
-//                        isFieldMissing = true
-//                    }
-//                }) {
-//                    Text("Add")
-//                }.keyboardShortcut(.defaultAction)
-//            }
-//        }
-//    }
-//}
 
 struct FormText: View {
     @State var text: String
@@ -288,16 +208,6 @@ struct FormText: View {
     
     var body: some View {
         Text(text).frame(width: formMargin, alignment: .leading)
-    }
-}
-
-
-struct BlaView: View {
-    @State private var selection = 0
-    var body: some View {
-        Button(action: { manager?.AddPassword(data: PasswordData(name: "Name", url: "Url", type: PasswordType.web, password: "1234"), keychain: "Keychain1") }) {
-            Text("ADD NEW PW")
-        }
     }
 }
 
