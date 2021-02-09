@@ -7,7 +7,7 @@
 
 import Foundation
 
-
+// MARK: - MODEL
 /// Model: Model storing all data
 class Model: ObservableObject {
     /// VaultData: Data for the Model
@@ -41,6 +41,7 @@ class Model: ObservableObject {
     }
 }
 
+// MARK: - VAULT-DATA
 /// VauldData: Stores all data
 struct VaultData: Codable {
     /// Dictionary with name of keychain as key and KeychainData as value
@@ -100,6 +101,7 @@ struct VaultData: Codable {
     }
 }
 
+// MARK: - KEYCHAIN-DATA
 /// KeychainData: Stores data for a keychain
 struct KeychainData: Codable {
     /// The name of the keychain
@@ -108,6 +110,7 @@ struct KeychainData: Codable {
     var passwords: [PasswordData]
 }
 
+// MARK: - PASSWORD-DATA
 /// PasswordData: Stores data for a password
 struct PasswordData: Codable {
     /// The display name for the password
@@ -135,6 +138,7 @@ struct PasswordData: Codable {
     var keychain: String
 }
 
+// MARK: - AUTOFILL-TYPE
 /// AutofillType: Type describing what to autofill
 enum AutofillType: String, Codable {
     case none = ""

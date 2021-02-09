@@ -7,12 +7,15 @@
 
 import SwiftUI
 
+// MARK: - SETTINGS-VIEW
+/// SettingsView: SwiftUI view for the app-settings
 struct SettingsView: View {
     var body: some View {
         Text("Hello, World!")
     }
 }
 
+// MARK: - PREVIEW-PROVIDER
 struct SettingsView_Previews: PreviewProvider {
     static var previews: some View {
         SettingsView()

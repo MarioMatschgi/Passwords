@@ -8,15 +8,19 @@
 import SwiftUI
 
 @main
+// MARK: - PASSWORD-APP
+/// PasswordApp: The app
 struct PasswordsApp: App {
-    @AppStorage("appTheme") var appTheme: String = "system"
+    // @AppStorage("appTheme") var appTheme: String = "system"
 
+    /// Creates a PasswordApp instance
+    init() {
+        manager = Manager()
+    }
+    
     @SceneBuilder var body: some Scene {
         WindowGroup {
             ContentView()
-            .onAppear() {
-                manager = Manager()
-            }
         }
         .commands {
             SidebarCommands()
@@ -64,21 +68,14 @@ struct PasswordsApp: App {
             SettingsView()
         }
     }
-
 }
 
-extension Notification.Name {
-    static let flipImage = Notification.Name("flip_image")
-    static let saveImage = Notification.Name("save_image")
-    static let showSamples = Notification.Name("show_samples")
-}
-
-struct MenuButtonStyling: ViewModifier {
-    func body(content: Content) -> some View {
-        content
-            .foregroundColor(.primary)
-            .padding(.bottom, 2)
-            .padding(.top, 1)
-    }
-}
+//struct MenuButtonStyling: ViewModifier {
+//    func body(content: Content) -> some View {
+//        content
+//            .foregroundColor(.primary)
+//            .padding(.bottom, 2)
+//            .padding(.top, 1)
+//    }
+//}
 

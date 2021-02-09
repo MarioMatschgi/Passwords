@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		ACCCFDF325D2A2DE00728671 /* SubViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACCCFDF225D2A2DE00728671 /* SubViews.swift */; };
 		ACE57EE425CDA2D1004D8B61 /* PasswordsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACE57EE325CDA2D1004D8B61 /* PasswordsApp.swift */; };
 		ACE57EE625CDA2D1004D8B61 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACE57EE525CDA2D1004D8B61 /* ContentView.swift */; };
 		ACE57EE825CDA2D1004D8B61 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = ACE57EE725CDA2D1004D8B61 /* Assets.xcassets */; };
@@ -18,10 +19,10 @@
 		ACE57F0625CDA62E004D8B61 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACE57F0525CDA62E004D8B61 /* SettingsView.swift */; };
 		ACE57F0925CDA6DA004D8B61 /* Authentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACE57F0825CDA6DA004D8B61 /* Authentication.swift */; };
 		ACE57F0E25CDDA81004D8B61 /* Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACE57F0D25CDDA81004D8B61 /* Data.swift */; };
-		ACE57F1325CDDEE1004D8B61 /* KeychainSwift in Frameworks */ = {isa = PBXBuildFile; productRef = ACE57F1225CDDEE1004D8B61 /* KeychainSwift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		ACCCFDF225D2A2DE00728671 /* SubViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubViews.swift; sourceTree = "<group>"; };
 		ACE57EE025CDA2D1004D8B61 /* Passwords.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Passwords.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		ACE57EE325CDA2D1004D8B61 /* PasswordsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordsApp.swift; sourceTree = "<group>"; };
 		ACE57EE525CDA2D1004D8B61 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -42,7 +43,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				ACE57F1325CDDEE1004D8B61 /* KeychainSwift in Frameworks */,
 				ACE57EFA25CDA4CD004D8B61 /* KeychainAccess in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -97,6 +97,7 @@
 				ACE57EE525CDA2D1004D8B61 /* ContentView.swift */,
 				ACE57EFD25CDA55B004D8B61 /* MainView.swift */,
 				ACE57F0525CDA62E004D8B61 /* SettingsView.swift */,
+				ACCCFDF225D2A2DE00728671 /* SubViews.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -135,7 +136,6 @@
 			name = Passwords;
 			packageProductDependencies = (
 				ACE57EF925CDA4CD004D8B61 /* KeychainAccess */,
-				ACE57F1225CDDEE1004D8B61 /* KeychainSwift */,
 			);
 			productName = Passwords;
 			productReference = ACE57EE025CDA2D1004D8B61 /* Passwords.app */;
@@ -166,7 +166,6 @@
 			mainGroup = ACE57ED725CDA2D1004D8B61;
 			packageReferences = (
 				ACE57EF825CDA4CC004D8B61 /* XCRemoteSwiftPackageReference "KeychainAccess" */,
-				ACE57F1125CDDEE1004D8B61 /* XCRemoteSwiftPackageReference "keychain-swift" */,
 			);
 			productRefGroup = ACE57EE125CDA2D1004D8B61 /* Products */;
 			projectDirPath = "";
@@ -195,6 +194,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				ACE57F0925CDA6DA004D8B61 /* Authentication.swift in Sources */,
+				ACCCFDF325D2A2DE00728671 /* SubViews.swift in Sources */,
 				ACE57EE625CDA2D1004D8B61 /* ContentView.swift in Sources */,
 				ACE57EFE25CDA55B004D8B61 /* MainView.swift in Sources */,
 				ACE57F0225CDA583004D8B61 /* Extentions.swift in Sources */,
@@ -403,14 +403,6 @@
 				minimumVersion = 4.2.1;
 			};
 		};
-		ACE57F1125CDDEE1004D8B61 /* XCRemoteSwiftPackageReference "keychain-swift" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/evgenyneu/keychain-swift.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 19.0.0;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -418,11 +410,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = ACE57EF825CDA4CC004D8B61 /* XCRemoteSwiftPackageReference "KeychainAccess" */;
 			productName = KeychainAccess;
-		};
-		ACE57F1225CDDEE1004D8B61 /* KeychainSwift */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = ACE57F1125CDDEE1004D8B61 /* XCRemoteSwiftPackageReference "keychain-swift" */;
-			productName = KeychainSwift;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

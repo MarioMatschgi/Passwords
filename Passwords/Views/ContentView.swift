@@ -7,14 +7,15 @@
 
 import SwiftUI
 
+// MARK: - CONTENT-VIEW
+/// SettingsView: SwiftUI view for the main window
 struct ContentView: View {
-    var debug = true
-    
+    /// The model for authentication
     @ObservedObject var authModel: AuthentificationModel = AuthentificationModel(localizedReason: "Reason")
     
     var body: some View {
         VStack {
-            if debug || authModel.loggedIn {
+            if manager!.debugMode || authModel.loggedIn {
                 MainView()
             }
             else {
@@ -24,6 +25,7 @@ struct ContentView: View {
     }
 }
 
+// MARK: - PREVIEW-PROVIDER
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
