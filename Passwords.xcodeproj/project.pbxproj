@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		ACCCFDF325D2A2DE00728671 /* SubViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACCCFDF225D2A2DE00728671 /* SubViews.swift */; };
+		ACCCFDF625D3015500728671 /* LibraryViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACCCFDF525D3015500728671 /* LibraryViews.swift */; };
 		ACE57EE425CDA2D1004D8B61 /* PasswordsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACE57EE325CDA2D1004D8B61 /* PasswordsApp.swift */; };
 		ACE57EE625CDA2D1004D8B61 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACE57EE525CDA2D1004D8B61 /* ContentView.swift */; };
 		ACE57EE825CDA2D1004D8B61 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = ACE57EE725CDA2D1004D8B61 /* Assets.xcassets */; };
@@ -23,6 +24,7 @@
 
 /* Begin PBXFileReference section */
 		ACCCFDF225D2A2DE00728671 /* SubViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubViews.swift; sourceTree = "<group>"; };
+		ACCCFDF525D3015500728671 /* LibraryViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryViews.swift; sourceTree = "<group>"; };
 		ACE57EE025CDA2D1004D8B61 /* Passwords.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Passwords.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		ACE57EE325CDA2D1004D8B61 /* PasswordsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordsApp.swift; sourceTree = "<group>"; };
 		ACE57EE525CDA2D1004D8B61 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -98,6 +100,7 @@
 				ACE57EFD25CDA55B004D8B61 /* MainView.swift */,
 				ACE57F0525CDA62E004D8B61 /* SettingsView.swift */,
 				ACCCFDF225D2A2DE00728671 /* SubViews.swift */,
+				ACCCFDF525D3015500728671 /* LibraryViews.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -195,6 +198,7 @@
 			files = (
 				ACE57F0925CDA6DA004D8B61 /* Authentication.swift in Sources */,
 				ACCCFDF325D2A2DE00728671 /* SubViews.swift in Sources */,
+				ACCCFDF625D3015500728671 /* LibraryViews.swift in Sources */,
 				ACE57EE625CDA2D1004D8B61 /* ContentView.swift in Sources */,
 				ACE57EFE25CDA55B004D8B61 /* MainView.swift in Sources */,
 				ACE57F0225CDA583004D8B61 /* Extentions.swift in Sources */,

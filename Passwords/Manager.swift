@@ -67,6 +67,7 @@ class Manager {
     /// - Parameters:
     ///     - data: RegisterVaultData to save to the Keychain
     func SaveRegisterData(data: VaultData) {
+        dump(data)
         appKeychain[key_data] = data.ToJSON()
     }
 }

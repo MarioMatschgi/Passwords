@@ -21,7 +21,7 @@ struct MainView: View {
     }
     
     /// Bool: Describes wether the add-sheet should be displayed
-    @State var isAddSheet = true//false
+    @State var isAddSheet = false
     
     /// Bool: Used to force an update on the view `update.toggle()`
     @State var update = false
@@ -29,12 +29,23 @@ struct MainView: View {
     var body: some View {
         NavigationView {
             List {
-                Section(header: Text("Keychains: (\(model.vaultData.keychains.count))")) {
-                    ForEach(model.vaultData.keychains.keys.sorted(), id: \.self) { key in
-                        let element: KeychainData = model.vaultData.keychains[key]!
-                        NavigationLink(destination: KeychainView(model: model, keychain: key)) {
-                            HStack {
-                                Text("\(element.name) (\(element.passwords.count))")
+                Section(header: Text("Keychains: (\(model.vaultData.getKeychains().count))")) {
+                    // All keychains
+                    NavigationLink(destination: KeychainView(model: model, keychain: "")) {
+                        HStack {
+                            Text("All keychains (\(model.vaultData.getAllPasswords().count))")
+                        }
+                    }
+                    
+                    // Keychain
+                    ForEach(model.vaultData.getKeychains().keys.sorted(), id: \.self) { key in
+                        if key != "" {
+                            let element: KeychainData = model.vaultData.getKeychains()[key]!
+                            
+                            NavigationLink(destination: KeychainView(model: model, keychain: key)) {
+                                HStack {
+                                    Text("\(element.name) (\(element.passwords.count))")
+                                }
                             }
                         }
                     }
@@ -66,7 +77,10 @@ extension View {
 
 // MARK: - TOOLBAR-MODIFIER
 struct ToolbarModifier: ViewModifier {
+    /// Bool: Whether the add sheet should be displayed
     @Binding var isAddSheet: Bool
+    /// String: The text in the search field
+    @State var search = ""
     
     func body(content: Content) -> some View {
         content.toolbar {
@@ -79,6 +93,33 @@ struct ToolbarModifier: ViewModifier {
                 Button(action: { isAddSheet = true }, label: {
                     Image(systemName: "plus")
                 })
+            }
+            ToolbarItem(placement: .status) {
+//                TextField("Search", text: $search).textFieldStyle(RoundedBorderTextFieldStyle())
+//                    .overlay(
+                        HStack {
+                            Image(systemName: "magnifyingglass")
+                                .foregroundColor(.gray)
+//                                .padding(.leading, 10)
+                            TextField("Search", text: $search).textFieldStyle(PlainTextFieldStyle())//.focusable(false)
+                        }//.focusable()
+//                    )
+                
+//                    Image(systemName: "magnifyingglass")
+//                        .foregroundColor(.gray)
+//                        .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+                
+//                TextField("", text: self.$search)
+////                    .textFieldStyle(RoundedBorderTextFieldStyle())
+//                    .textFieldStyle(PlainTextFieldStyle())
+//                    .overlay(
+//                        HStack {
+//                            Image(systemName: "magnifyingglass")
+//                                .foregroundColor(.gray)
+//                                .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+//                                .padding(.leading, 10)
+//                        }
+//                    )
             }
         }
     }
