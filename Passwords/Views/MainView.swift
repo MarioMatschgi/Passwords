@@ -15,6 +15,7 @@ struct MainView: View {
     /// The model for all displayed data
     @ObservedObject var model: Model = Model()
     
+    // MARK: init
     /// Creates an instance of MainView
     init() {
         mainView = self
@@ -26,6 +27,8 @@ struct MainView: View {
     /// Bool: Used to force an update on the view `update.toggle()`
     @State var update = false
     
+    // MARK: body
+    /// The content of the view
     var body: some View {
         NavigationView {
             List {
@@ -63,7 +66,7 @@ struct MainView: View {
         }
         
         .onAppear() {
-            model.vaultData = manager!.LoadRegisterData()
+            model.vaultData = manager!.loadRegisterData()
         }
     }
 }
@@ -82,6 +85,8 @@ struct ToolbarModifier: ViewModifier {
     /// String: The text in the search field
     @State var search = ""
     
+    // MARK: body
+    /// The content of the view
     func body(content: Content) -> some View {
         content.toolbar {
             ToolbarItem(placement: .navigation) {
@@ -124,6 +129,8 @@ struct ToolbarModifier: ViewModifier {
         }
     }
     
+    // MARK: toggleSidebar
+    /// Toggles the sidebar on or off
     func toggleSidebar() {
         #if os(macOS)
         NSApp.keyWindow?.firstResponder?.tryToPerform(#selector(NSSplitViewController.toggleSidebar(_:)), with: nil)

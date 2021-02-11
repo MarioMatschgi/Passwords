@@ -10,6 +10,8 @@ import SwiftUI
 // MARK: - SETTINGS-VIEW
 /// SettingsView: SwiftUI view for the app-settings
 struct SettingsView: View {
+    // MARK: body
+    /// The content of the view
     var body: some View {
         Text("Hello, World!")
     }

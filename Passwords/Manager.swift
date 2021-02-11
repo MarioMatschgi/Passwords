@@ -8,10 +8,10 @@
 import Foundation
 import KeychainAccess
 
-// MARK: - MANAGER
 /// Instance of the Manager class
 var manager: Manager?
 
+// MARK: - MANAGER
 /// Manager: Class for managing general things
 class Manager {
     /// Debug mode 
@@ -24,17 +24,19 @@ class Manager {
     /// The app-Keychain
     let appKeychain: Keychain
     
+    // MARK: init
     /// Creates a Manager instance
     init() {
         appKeychain = Keychain(accessGroup: keychainAccessGroup)
         
         manager = self
         
-        Setup()
+        setup()
     }
     
+    // MARK: setup
     /// Setup for the Manager
-    func Setup() {
+    func setup() {
         print("Setting up Manager...")
         
         print("Finished setting up Manager!")
@@ -55,19 +57,22 @@ class Manager {
     }
  */
     
+    // MARK: loadRegisterData
     /// Loads the vault data from the Keychain
     /// - Returns: RegisterVaultData: Loaded from the Keychain
-    func LoadRegisterData() -> VaultData {
+    func loadRegisterData() -> VaultData {
         if !appKeychain.allKeys().contains(key_data) || appKeychain[key_data] == nil {
-            appKeychain[key_data] = VaultData().ToJSON()
+            appKeychain[key_data] = VaultData().toJSON()
         }
         return VaultData(json: appKeychain[key_data]!)
     }
+    
+    // MARK: saveRegisterData
     /// Saves the vault data to the Keychain
     /// - Parameters:
     ///     - data: RegisterVaultData to save to the Keychain
-    func SaveRegisterData(data: VaultData) {
+    func saveRegisterData(data: VaultData) {
         dump(data)
-        appKeychain[key_data] = data.ToJSON()
+        appKeychain[key_data] = data.toJSON()
     }
 }

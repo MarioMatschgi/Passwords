@@ -13,11 +13,13 @@ import SwiftUI
 struct PasswordsApp: App {
     // @AppStorage("appTheme") var appTheme: String = "system"
 
+    // MARK: init
     /// Creates a PasswordApp instance
     init() {
         manager = Manager()
     }
     
+    // MARK: body
     @SceneBuilder var body: some Scene {
         WindowGroup {
             ContentView()

@@ -16,6 +16,8 @@ struct KeychainView: View {
     /// The name of the Keychain displayed
     @State var keychain: String
     
+    // MARK: body
+    /// The content of the view
     var body: some View {
         NavigationView {
             List {
@@ -50,6 +52,8 @@ struct AddView: View {
     /// Bool: Whether a required field is not filled in
     @State var isFieldMissing = false
     
+    // MARK: body
+    /// The content of the view
     var body: some View {
         VStack {
             PasswordBaseView(model: model, pwData: $pwData, isFieldMissing: $isFieldMissing)
@@ -66,15 +70,16 @@ struct AddView: View {
                     }
                 }
                 Spacer()
-                Button(action: { TryAdd() }) {
+                Button(action: { tryAdd() }) {
                     Text("Add")
                 }.keyboardShortcut(.defaultAction)
             }
         }.padding()
     }
     
+    // MARK: tryAdd
     /// Try to add the current password to the keychain
-    func TryAdd() {
+    func tryAdd() {
         if pwData.isValid() {
             isFieldMissing = false
             
@@ -87,6 +92,7 @@ struct AddView: View {
         }
     }
     
+    // MARK: fillForm
     /// Fill the form with default values
     func fillForm() {
         print("D \(pwData.displayname)")
@@ -114,6 +120,8 @@ struct PasswordInfoView: View {
     /// Bool: Whether a required field is not filled in
     @State var isFieldMissing = false
     
+    // MARK: body
+    /// The content of the view
     var body: some View {
         VStack {
             PasswordBaseView(model: model, pwData: $pwData, isFieldMissing: $isFieldMissing).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -149,6 +157,8 @@ struct PasswordBaseView: View {
     /// CGFloat: Amount of margin for the form
     let formMargin = CGFloat(100)
     
+    // MARK: body
+    /// The content of the view
     var body: some View {
         VStack {
             Form {

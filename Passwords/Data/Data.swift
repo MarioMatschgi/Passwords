@@ -13,11 +13,13 @@ class Model: ObservableObject {
     /// VaultData: Data for the Model
     @Published var vaultData: VaultData
     
+    // MARK: init
     /// Creates a Model with no initial data
     init() {
         self.vaultData = VaultData()
     }
     
+    // MARK: init
     /// Creates a Model with the given data
     /// - Parameters:
     ///     - vaultData: VaultData: The initial data for the Model
@@ -25,6 +27,8 @@ class Model: ObservableObject {
         self.vaultData = vaultData
     }
     
+    
+    // MARK: setPassword
     /// Sets a password in the Keychain, if one with the displayname exists it will get changed, if none with the displayname exists it will get added
     /// - Parameters:
     ///     - data: PasswordData: Data for the password
@@ -40,6 +44,7 @@ class Model: ObservableObject {
         return true
     }
     
+    // MARK: removePassword
     /// Removes a password from the Keychain
     /// - Parameters:
     ///     - data: PasswordData: Data for the password
@@ -60,12 +65,14 @@ struct VaultData: Codable {
     /// Array containing all passwords in the keychain
     private var passwords: [PasswordData]
     
+    // MARK: init
     /// Creates an empty VaultData
     init() {
         keychains = [:]
         passwords = []
     }
     
+    // MARK: init
     /// Creates a VaultData from a JSON String
     init(json: String) {
         self.init()
@@ -81,6 +88,7 @@ struct VaultData: Codable {
         generateAllPasswords()
     }
     
+    // MARK: generateAllPasswords
     /// Generates all passwords in the vault and fills them into the all passwords array
     private mutating func generateAllPasswords() {
         passwords = []
@@ -91,12 +99,14 @@ struct VaultData: Codable {
         }
     }
     
+    // MARK: getKeychains
     /// Gets the keychains Dictionary
     /// - Returns: Dictionary: Keychains Dictionary
     func getKeychains() -> [String: KeychainData] {
         return keychains
     }
     
+    // MARK: getPasswords
     /// Gets the passwords for the given keychain. If the keychain is empty it will get all passwords
     /// - Parameters:
     ///     - keychain: The keychain for which the passwords should be returned
@@ -109,15 +119,17 @@ struct VaultData: Codable {
         return keychains[keychain] == nil ? [] : keychains[keychain]!.passwords
     }
     
+    // MARK: getAllPasswords
     /// Gets all passwords of the vault
     /// - Returns: Array: An Array with all of the passwords of the vault
     func getAllPasswords() -> [PasswordData] {
         return getPasswords(for: "")
     }
     
+    // MARK: toJSON
     /// Converts the VaultData to a JSON string
     /// - Returns: String: The VaultData as a JSON String
-    func ToJSON() -> String {
+    func toJSON() -> String {
         do {
             let jsonData = try JSONEncoder().encode(keychains)
             return String(data: jsonData, encoding: .utf8)!
@@ -126,6 +138,7 @@ struct VaultData: Codable {
         return ""
     }
     
+    // MARK: setPassword
     /// Sets a password in the vault, if one with the displayname exists it will get changed, if none with the displayname exists it will get added
     /// - Parameters:
     ///     - data: PasswordData: Data for the password
@@ -155,11 +168,12 @@ struct VaultData: Codable {
         }
         
         // Save to Keychain
-        manager!.SaveRegisterData(data: self)
+        manager!.saveRegisterData(data: self)
         
         return true
     }
     
+    // MARK: removePassword
     /// Removes a password from the vault
     /// - Parameters:
     ///     - data: PasswordData: Data for the password
@@ -178,7 +192,7 @@ struct VaultData: Codable {
         }
         
         // Update Keychain
-        manager!.SaveRegisterData(data: self)
+        manager!.saveRegisterData(data: self)
     }
 }
 
@@ -221,18 +235,21 @@ struct PasswordData: Codable, Identifiable {
     /// The username of the password
     var keychain: String
     
+    // MARK: isValid
     /// Validates the password, checks if all fields are set
     /// - Returns: Bool: Whether the all fields are set
     func isValid() -> Bool {
         return displayname != "" && username != "" && (autofill == .email ? email != "" : autofill == .username ? username != "" : true) && password != "" && autofill != .none
     }
     
+    // MARK: equalsID
     /// Are the PasswordDatas UUIDs equal?
     /// - Returns: Bool: Whether the PasswordDatas UUIDs are equal
     func equalsID(equals data: PasswordData) -> Bool {
         return id == data.id
     }
     
+    // MARK: CodingKeys
     /// List of values that should be encoded in JSON
     enum CodingKeys: String, CodingKey {
         case displayname, username, email, website, password, description, autofill, keychain

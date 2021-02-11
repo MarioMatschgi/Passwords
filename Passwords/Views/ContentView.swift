@@ -13,6 +13,8 @@ struct ContentView: View {
     /// The model for authentication
     @ObservedObject var authModel: AuthentificationModel = AuthentificationModel(localizedReason: "Reason")
     
+    // MARK: body
+    /// The content of the view
     var body: some View {
         VStack {
             if manager!.debugMode || authModel.loggedIn {
