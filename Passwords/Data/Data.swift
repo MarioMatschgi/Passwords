@@ -28,18 +28,29 @@ class Model: ObservableObject {
     }
     
     
+    // MARK: setKeychain
+    /// Sets a keychain in the vault, if one with the name exists it will get changed, if none with the name exists it will get added
+    /// - Parameters:
+    ///     - keychain: KeychainData: Data for the keychain
+    func setKeychain(keychain: KeychainData) {
+        vaultData.setKeychain(keychain: keychain)
+    }
+    
     // MARK: setPassword
     /// Sets a password in the Keychain, if one with the displayname exists it will get changed, if none with the displayname exists it will get added
     /// - Parameters:
     ///     - data: PasswordData: Data for the password
     /// - Returns: Bool: Wether the adding was successful
     func setPassword(data: PasswordData) -> Bool {
+        let oldData = vaultData.getPassword(forID: data.id)
+        
         // Add password to app Keychain
         let res = vaultData.setPassword(data: data)
         if !res { return false }
         
         // Add password to user Keychain
         // ToDo:
+        manager!.setPasswordInKeychain(oldData: oldData, newData: data)
         
         return true
     }
@@ -54,6 +65,7 @@ class Model: ObservableObject {
         
         // Remove password from user Keychain
         // ToDo:
+        manager!.removePasswordFromKeychain(data: data)
     }
 }
 
@@ -88,6 +100,18 @@ struct VaultData: Codable {
         generateAllPasswords()
     }
     
+    // MARK: toJSON
+    /// Converts the VaultData to a JSON string
+    /// - Returns: String: The VaultData as a JSON String
+    func toJSON() -> String {
+        do {
+            let jsonData = try JSONEncoder().encode(keychains)
+            return String(data: jsonData, encoding: .utf8)!
+        } catch { print(error) }
+        
+        return ""
+    }
+    
     // MARK: generateAllPasswords
     /// Generates all passwords in the vault and fills them into the all passwords array
     private mutating func generateAllPasswords() {
@@ -119,6 +143,15 @@ struct VaultData: Codable {
         return keychains[keychain] == nil ? [] : keychains[keychain]!.passwords
     }
     
+    func getPassword(forID uuid: UUID) -> PasswordData? {
+        if let idx = passwords.firstIndex(where: { $0.id == uuid }) {
+            // Password exists
+            return passwords[idx]
+        }
+        
+        return nil
+    }
+    
     // MARK: getAllPasswords
     /// Gets all passwords of the vault
     /// - Returns: Array: An Array with all of the passwords of the vault
@@ -126,16 +159,25 @@ struct VaultData: Codable {
         return getPasswords(for: "")
     }
     
-    // MARK: toJSON
-    /// Converts the VaultData to a JSON string
-    /// - Returns: String: The VaultData as a JSON String
-    func toJSON() -> String {
-        do {
-            let jsonData = try JSONEncoder().encode(keychains)
-            return String(data: jsonData, encoding: .utf8)!
-        } catch { print(error) }
+    // MARK: setKeychain
+    /// Sets a keychain, if one with the name exists it will get changed, if none with the name exists it will get added
+    /// - Parameters:
+    ///     - keychain: KeychainData: Data for the keychain
+    mutating func setKeychain(keychain: KeychainData) {
+        if keychains[keychain.name] == nil {
+            keychains[keychain.name] = keychain
+        }
         
-        return ""
+        // Save to Keychain
+        manager!.saveRegisterData(data: self)
+    }
+    
+    // MARK: removeKeychain
+    /// Removes a keychain from the vault
+    /// - Parameters:
+    ///     - data: KeychainData: Data for the keychain
+    mutating func removeKeychain(keychain: KeychainData) {
+        keychains[keychain.name] = nil
     }
     
     // MARK: setPassword
@@ -146,7 +188,13 @@ struct VaultData: Codable {
     mutating func setPassword(data: PasswordData) -> Bool {
         // Add/set to/in passwords
         if let idx = passwords.firstIndex(where: { $0.equalsID(equals: data) }) {
-            passwords[idx] = data   // Password in there, replace
+            // Check if keychain changed, if so, remove old from keychains arr
+            if passwords[idx].keychain != data.keychain {
+                removePassword(data: passwords[idx])
+                passwords.append(data)  // Password not there, add
+            } else {
+                passwords[idx] = data   // Password in there, replace
+            }
         } else {
             passwords.append(data)  // Password not there, add
         }
@@ -186,9 +234,11 @@ struct VaultData: Codable {
         // Remove from keychains
         if keychains[data.keychain] != nil, let idx = keychains[data.keychain]!.passwords.firstIndex(where: { $0.equalsID(equals: data) }) {
             keychains[data.keychain]!.passwords.remove(at: idx)
+            /* DONT
             if keychains[data.keychain]!.passwords.count <= 0 { // Remove keychain if empty
                 keychains[data.keychain] = nil
             }
+             */
         }
         
         // Update Keychain
@@ -203,6 +253,10 @@ struct KeychainData: Codable {
     var name: String
     /// Array containing PasswordData for all passwords in this keychain
     var passwords: [PasswordData]
+    
+    func isValid() -> Bool {
+        return name.trimmingCharacters(in: .whitespacesAndNewlines) != ""
+    }
 }
 
 // MARK: - PASSWORD-DATA
@@ -226,6 +280,9 @@ struct PasswordData: Codable, Identifiable {
     /// The actual password for the password
     var password: String
     
+    /// The password for the confirmation field
+    var passwordConfirm: String = ""
+    
     /// The description of the password
     var description: String
     
@@ -239,7 +296,7 @@ struct PasswordData: Codable, Identifiable {
     /// Validates the password, checks if all fields are set
     /// - Returns: Bool: Whether the all fields are set
     func isValid() -> Bool {
-        return displayname != "" && username != "" && (autofill == .email ? email != "" : autofill == .username ? username != "" : true) && password != "" && autofill != .none
+        return password == passwordConfirm && displayname != "" && username != "" && (autofill == .email ? email != "" : (autofill == .username ? username != "" : false) ) && password != "" && autofill != .none
     }
     
     // MARK: equalsID
@@ -247,6 +304,19 @@ struct PasswordData: Codable, Identifiable {
     /// - Returns: Bool: Whether the PasswordDatas UUIDs are equal
     func equalsID(equals data: PasswordData) -> Bool {
         return id == data.id
+    }
+    
+    // MARK: getAutofill
+    /// Gets the property that will get autofilled
+    /// - Returns: String: The field that should be autofilled
+    func getAutofill() -> String {
+        if autofill == .email {
+            return email
+        } else if autofill == .username {
+            return username
+        }
+        
+        return ""
     }
     
     // MARK: CodingKeys

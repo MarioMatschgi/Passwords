@@ -8,6 +8,14 @@
 import Foundation
 import SwiftUI
 
+// MARK: - MARGINS
+/// Class: Defines margins
+class Margins {
+    /// CGFloat: Amount of margin for the form
+    static let addSheetFormMargin = CGFloat(120)
+}
+
+
 // MARK: - KEYCHAIN-VIEW
 /// KeychainView: View displaying a Keychain
 struct KeychainView: View {
@@ -46,19 +54,49 @@ struct AddView: View {
     /// Bool: Whether the sheet should be displayed
     @Binding var isOpen: Bool
     
-    /// PasswordData: Stores information for password
+    /// PasswordData: Stores information for new password
     @State var pwData = PasswordData(displayname: "", username: "", email: "", website: "", password: "", description: "", autofill: .none, keychain: "")
+    
+    @State var pbv: PasswordBaseView? = nil
+    
+    /// KeychainData: Stores information for new keychain
+    @State var newKeychain = KeychainData(name: "", passwords: [])
     
     /// Bool: Whether a required field is not filled in
     @State var isFieldMissing = false
+    
+    @State var addType = AddType.password
     
     // MARK: body
     /// The content of the view
     var body: some View {
         VStack {
-            PasswordBaseView(model: model, pwData: $pwData, isFieldMissing: $isFieldMissing)
+            Picker(selection: $addType, label: EmptyView()) {
+                ForEach(AddType.allCases, id: \.self) {
+                    Text($0.rawValue)
+                }
+            }.pickerStyle(SegmentedPickerStyle())
+            Spacer().frame(height: 10)
             
-            Spacer().frame(minHeight: 25)
+            ScrollView {
+                VStack {
+                    if addType == .password {
+                        PasswordBaseView(model: model, pwData: $pwData)
+                    } else if addType == .keychain {
+                        HStack(alignment: VerticalAlignment.top) {
+                            Text("Displayname*").formText(Margins.addSheetFormMargin)
+                            TextField("Displayname", text: $newKeychain.name).textFieldStyle(RoundedBorderTextFieldStyle())
+                        }
+                    }
+                    
+                    if isFieldMissing {
+                        Spacer().frame(height: 10)
+                        FieldMissingText()
+                    }
+                }.padding(.trailing)
+            }
+            
+            Spacer().frame(height: 25)
             HStack {
                 Button(action: { isOpen = false }) {
                     Text("Cancel")
@@ -74,38 +112,69 @@ struct AddView: View {
                     Text("Add")
                 }.keyboardShortcut(.defaultAction)
             }
-        }.padding()
+        }.frame(width: 500, height: 400).padding()  // ToDo: EV IN BASE VIEW VERSCHIEBEN
     }
     
     // MARK: tryAdd
     /// Try to add the current password to the keychain
     func tryAdd() {
-        if pwData.isValid() {
-            isFieldMissing = false
-            
-            // Add new PW
-            _ = model.setPassword(data: pwData)
-            
-            isOpen = false
-        } else {
-            isFieldMissing = true
+        if addType == .password {
+            pwData.displayname      = pwData.displayname    .trimmingCharacters(in: .whitespacesAndNewlines)
+            pwData.username         = pwData.username       .trimmingCharacters(in: .whitespacesAndNewlines)
+            pwData.email            = pwData.email          .trimmingCharacters(in: .whitespacesAndNewlines)
+            pwData.website          = pwData.website        .trimmingCharacters(in: .whitespacesAndNewlines)
+            pwData.password         = pwData.password       .trimmingCharacters(in: .whitespacesAndNewlines)
+            pwData.passwordConfirm  = pwData.passwordConfirm.trimmingCharacters(in: .whitespacesAndNewlines)
+            pwData.description      = pwData.description    .trimmingCharacters(in: .whitespacesAndNewlines)
+            pwData.keychain         = pwData.keychain       .trimmingCharacters(in: .whitespacesAndNewlines)
+            if pwData.isValid() {
+                isFieldMissing = false
+                
+                // Add new PW
+                _ = model.setPassword(data: pwData)
+                
+                isOpen = false
+            } else {
+                isFieldMissing = true
+            }
+        } else if addType == .keychain {
+            newKeychain.name = newKeychain.name.trimmingCharacters(in: .whitespacesAndNewlines)
+            if newKeychain.isValid() {
+                isFieldMissing = false
+                
+                // Add new Keychain
+                model.setKeychain(keychain: newKeychain)
+                
+                isOpen = false
+            } else {
+                isFieldMissing = true
+            }
         }
     }
     
     // MARK: fillForm
     /// Fill the form with default values
     func fillForm() {
-        print("D \(pwData.displayname)")
-        pwData.displayname = "Displayname"
-        pwData.username = "Mario"
-        pwData.email = "mario@programario.at"
-        pwData.website = "programario.at"
-        pwData.password = "1234"
-        pwData.description = "Programario is the best"
-        pwData.autofill = .email
-        pwData.keychain = "Keychain1"
-        
-        print("D \(pwData.displayname)")
+        if addType == .password {
+            pwData.displayname      = "Displayname"
+            pwData.username         = "Mario"
+            pwData.email            = "mario@programario.at"
+            pwData.website          = "programario.at"
+            pwData.password         = "1234"
+            pwData.passwordConfirm  = "1234"
+            pwData.description      = "Programario is the best"
+            pwData.autofill         = .email
+            pwData.keychain         = "Keychain1"
+        } else if addType == .keychain {
+            newKeychain.name        = "Keychain1"
+        }
+    }
+    
+    // MARK: AddType
+    /// Enum: Types of things to add in the add-sheet
+    enum AddType: String, CaseIterable {
+        case password = "Password"
+        case keychain = "Keychain"
     }
 }
 
@@ -124,7 +193,12 @@ struct PasswordInfoView: View {
     /// The content of the view
     var body: some View {
         VStack {
-            PasswordBaseView(model: model, pwData: $pwData, isFieldMissing: $isFieldMissing).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            PasswordBaseView(model: model, pwData: $pwData).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            
+            if isFieldMissing {
+                Spacer().frame(height: 10)
+                FieldMissingText()
+            }
         
             Spacer().frame(height: 25)
             HStack {
@@ -148,14 +222,8 @@ struct PasswordBaseView: View {
     /// PasswordData: Stores information for password
     @Binding var pwData: PasswordData
     
-    /// Bool: Whether a required field is not filled in
-    @Binding var isFieldMissing: Bool
-    
     /// Bool: Used to force an update on the view `update.toggle()`
     @State var update = false
-    
-    /// CGFloat: Amount of margin for the form
-    let formMargin = CGFloat(100)
     
     // MARK: body
     /// The content of the view
@@ -163,40 +231,46 @@ struct PasswordBaseView: View {
         VStack {
             Form {
                 HStack(alignment: VerticalAlignment.top) {
-                    Text("Displayname*").formText(formMargin)
+                    Text("Displayname*").formText(Margins.addSheetFormMargin)
                     TextField("Displayname", text: $pwData.displayname).textFieldStyle(RoundedBorderTextFieldStyle())
                 }
                 HStack(alignment: VerticalAlignment.top) {
-                    Text("Username\(pwData.autofill == .username ? "*" : "")").formText(formMargin)
+                    Text("Username\(pwData.autofill == .username ? "*" : "")").formText(Margins.addSheetFormMargin)
                     TextField("Username", text: $pwData.username).textFieldStyle(RoundedBorderTextFieldStyle())
                 }
                 HStack(alignment: VerticalAlignment.top) {
-                    Text("E-mail\(pwData.autofill == .email ? "*" : "")").formText(formMargin)
+                    Text("E-mail\(pwData.autofill == .email ? "*" : "")").formText(Margins.addSheetFormMargin)
                     TextField("e-mail", text: $pwData.email).textFieldStyle(RoundedBorderTextFieldStyle())
                 }
                 HStack(alignment: VerticalAlignment.top) {
-                    Text("Website").formText(formMargin)
+                    Text("Website").formText(Margins.addSheetFormMargin)
                     TextField("website", text: $pwData.website).textFieldStyle(RoundedBorderTextFieldStyle())
                 }
                 HStack(alignment: VerticalAlignment.top) {
-                    Text("Password*").formText(formMargin)
+                    Text("Password*").formText(Margins.addSheetFormMargin)
                     SecureField("Password", text: $pwData.password).textFieldStyle(RoundedBorderTextFieldStyle())
                 }
                 HStack(alignment: VerticalAlignment.top) {
-                    Text("Description").formText(formMargin)
+                    Text("Confirm password*").formText(Margins.addSheetFormMargin)
+                    SecureField("Confirm password", text: $pwData.passwordConfirm).textFieldStyle(RoundedBorderTextFieldStyle())
+                }
+                HStack(alignment: VerticalAlignment.top) {
+                    Text("Description").formText(Margins.addSheetFormMargin)
                     TextField("Description", text: $pwData.description).textFieldStyle(RoundedBorderTextFieldStyle())
                 }
                 HStack(alignment: VerticalAlignment.top) {
-                    Text("Keychain").formText(formMargin)
+                    Text("Keychain").formText(Margins.addSheetFormMargin)
                     Picker(selection: $pwData.keychain, label: EmptyView()) {
                         Text("none").tag("")
                         ForEach(model.vaultData.getKeychains().keys.sorted(), id: \.self) { keychain in
-                            Text(keychain).tag(keychain)
+                            if keychain != "" {
+                                Text(keychain).tag(keychain)
+                            }
                         }
                     }.labelsHidden()
                 }
                 HStack(alignment: VerticalAlignment.top) {
-                    Text("Autofill*").formText(formMargin)
+                    Text("Autofill*").formText(Margins.addSheetFormMargin)
                     Picker(selection: $pwData.autofill, label: EmptyView()) {
                         Text("Username").tag(AutofillType.username)
                         Text("E-mail").tag(AutofillType.email)
@@ -205,15 +279,22 @@ struct PasswordBaseView: View {
                 if manager!.debugMode {
                     Spacer().frame(height: 10)
                     Section(header: Text("DEBUG:")) {
-                        Text("UUID: \(pwData.id)")
+                        HStack(alignment: VerticalAlignment.top) {
+                            Text("UUID:").formText(Margins.addSheetFormMargin)
+                            Text("\(pwData.id)")
+                        }
                     }
+                    
                 }
             }
-            
-            if isFieldMissing {
-                Spacer().frame(minHeight: 10)
-                Text("Please fill in all required (*) fields").foregroundColor(Color.red)
-            }
-        }.frame(idealWidth: 400, idealHeight: 250)
+        }.frame(idealWidth: 500)
+    }
+}
+
+// MARK: FieldMissingText
+/// View: Displays a "Please fill in all required fields" text
+struct FieldMissingText: View {
+    var body: some View {
+        Text("Please fill in all required (*) fields").foregroundColor(Color.red)
     }
 }

@@ -7,19 +7,11 @@
 
 import SwiftUI
 
-var mainView: MainView?
-
 // MARK: - MAIN-VIEW
 /// Main-View: The main view where everything happens
 struct MainView: View {
     /// The model for all displayed data
     @ObservedObject var model: Model = Model()
-    
-    // MARK: init
-    /// Creates an instance of MainView
-    init() {
-        mainView = self
-    }
     
     /// Bool: Describes wether the add-sheet should be displayed
     @State var isAddSheet = false
@@ -36,7 +28,7 @@ struct MainView: View {
                     // All keychains
                     NavigationLink(destination: KeychainView(model: model, keychain: "")) {
                         HStack {
-                            Text("All keychains (\(model.vaultData.getAllPasswords().count))")
+                            Text("🔐 All keychains (\(model.vaultData.getAllPasswords().count))")
                         }
                     }
                     
@@ -97,7 +89,7 @@ struct ToolbarModifier: ViewModifier {
             ToolbarItem(placement: .primaryAction) {
                 Button(action: { isAddSheet = true }, label: {
                     Image(systemName: "plus")
-                })
+                })//.keyboardShortcut("n", modifiers: .command)
             }
             ToolbarItem(placement: .status) {
 //                TextField("Search", text: $search).textFieldStyle(RoundedBorderTextFieldStyle())

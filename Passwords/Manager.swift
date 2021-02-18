@@ -57,6 +57,34 @@ class Manager {
     }
  */
     
+    func setPasswordInKeychain(oldData: PasswordData?, newData: PasswordData) {
+        // Remove old password
+        if oldData != nil {
+            removePasswordFromKeychain(data: oldData!)
+        }
+        
+        // Add new password
+        addPasswordToKeychain(data: newData)
+    }
+    func addPasswordToKeychain(data: PasswordData) {
+        print("Add \(data.displayname) ID: \(data.id)")
+        if let keychain = getKeychainForPassword(data: data) {
+            keychain[data.getAutofill()] = data.password
+        }
+    }
+    func removePasswordFromKeychain(data: PasswordData) {
+        print("Remove \(data.displayname) ID: \(data.id)")
+    }
+    func isPasswordInKeychain() {
+        
+    }
+    func getKeychainForPassword(data: PasswordData) -> Keychain? {
+        if data.website != "" { // Password is webpassword
+            return Keychain(server: data.website, protocolType: .https, authenticationType: .htmlForm)
+        }
+        return nil
+    }
+    
     // MARK: loadRegisterData
     /// Loads the vault data from the Keychain
     /// - Returns: RegisterVaultData: Loaded from the Keychain
@@ -72,7 +100,7 @@ class Manager {
     /// - Parameters:
     ///     - data: RegisterVaultData to save to the Keychain
     func saveRegisterData(data: VaultData) {
-        dump(data)
+//        dump(data)
         appKeychain[key_data] = data.toJSON()
     }
 }

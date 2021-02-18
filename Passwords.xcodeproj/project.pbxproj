@@ -71,9 +71,9 @@
 		ACE57EE225CDA2D1004D8B61 /* Passwords */ = {
 			isa = PBXGroup;
 			children = (
+				ACE57EE325CDA2D1004D8B61 /* PasswordsApp.swift */,
 				ACE57F0C25CDDA72004D8B61 /* Data */,
 				ACE57F0025CDA576004D8B61 /* Extentions */,
-				ACE57EE325CDA2D1004D8B61 /* PasswordsApp.swift */,
 				ACE57EF525CDA45D004D8B61 /* Manager.swift */,
 				ACE57F0825CDA6DA004D8B61 /* Authentication.swift */,
 				ACE57EFC25CDA4DE004D8B61 /* Views */,

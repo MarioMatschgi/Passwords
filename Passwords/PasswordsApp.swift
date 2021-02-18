@@ -26,44 +26,11 @@ struct PasswordsApp: App {
         }
         .commands {
             SidebarCommands()
-//            CommandGroup(after: .windowArrangement) {
-//                Button(action: {
-//                    NSApp.appearance = NSAppearance(named: .darkAqua)
-//                    appTheme = "dark"
-//                }) {
-//                    Text("Dark mode").fontWeight(.medium)
-//                }.modifier(MenuButtonStyling())
-//
-//                Button(action: {
-//                    NSApp.appearance = NSAppearance(named: .aqua)
-//                    appTheme = "light"
-//                }) {
-//                    Text("Light mode").fontWeight(.medium)
-//                }.modifier(MenuButtonStyling())
-//
-//                Button(action: {
-//                    NSApp.appearance = nil
-//                    appTheme = "system"
-//                }) {
-//                    Text("System mode").fontWeight(.medium)
-//                }.modifier(MenuButtonStyling())
-//            }
-
-//            CommandMenu("Utilities") {
-//                Button(action: {
-//                    NotificationCenter.default.post(name: .flipImage, object: nil)
-//                }) {
-//                    Text("Flip Image").fontWeight(.medium)
-//                }.modifier(MenuButtonStyling())
-//                .keyboardShortcut("i")
-//
-//                Button(action: {
-//                    NotificationCenter.default.post(name: .showSamples, object: nil)
-//                }) {
-//                    Text("Toggle UI Samples Window").fontWeight(.medium)
-//                }.modifier(MenuButtonStyling())
-//                .keyboardShortcut("u")
-//            }
+            CommandGroup(replacing: CommandGroupPlacement.newItem) {
+                Button(action: {  }, label: {
+                    Text("New item")
+                }).keyboardShortcut("n", modifiers: .command)
+            }
         }
 
         Settings {
